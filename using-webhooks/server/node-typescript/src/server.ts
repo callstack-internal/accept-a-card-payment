@@ -9,7 +9,7 @@ import express from "express";
 import Stripe from "stripe";
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY, {
   apiVersion: "2020-08-27",
-  typescript: true
+  typescript: true,
 });
 
 const app = express();
@@ -29,6 +29,10 @@ app.use(
     }
   }
 );
+
+app.get("/stripe-key", (_: express.Request, res: express.Response): void => {
+  res.send({ publishableKey: process.env.STRIPE_PUBLISHABLE_KEY });
+});
 
 app.get("/checkout", (_: express.Request, res: express.Response): void => {
   // Serve checkout page.
@@ -55,7 +59,7 @@ app.post(
     // Create a PaymentIntent with the order amount and currency.
     const params: Stripe.PaymentIntentCreateParams = {
       amount: calculateOrderAmount(items),
-      currency
+      currency,
     };
 
     const paymentIntent: Stripe.PaymentIntent = await stripe.paymentIntents.create(
@@ -65,7 +69,7 @@ app.post(
     // Send publishable key and PaymentIntent client_secret to client.
     res.send({
       clientSecret: paymentIntent.client_secret,
-      publishableKey: process.env.STRIPE_PUBLISHABLE_KEY
+      publishableKey: process.env.STRIPE_PUBLISHABLE_KEY,
     });
   }
 );
